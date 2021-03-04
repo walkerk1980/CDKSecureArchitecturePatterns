@@ -40,7 +40,25 @@ def get_templates():
     return templates
 
 def test_vpc_created():
-    assert("AWS::EC2::VPC" in get_templates().get('NetworkStack'))
+    assert('AWS::EC2::VPC' in get_templates().get('NetworkStack'))
 
-def test_instance_created():
-    assert("AWS::EC2::Instance" in get_templates().get('FrontendStack'))
+frontend_resources = [
+    'AWS::IAM::Role',
+    'AWS::IAM::Policy',
+    'AWS::EC2::SecurityGroup',
+    'AWS::EC2::SecurityGroupIngress',
+    'AWS::IAM::InstanceProfile',
+    'AWS::EC2::Instance',
+    'AWS::IAM::InstanceProfile',
+    'AWS::CertificateManager::Certificate',
+    'AWS::EC2::SecurityGroup',
+    'AWS::ElasticLoadBalancingV2::LoadBalancer',
+    'AWS::ElasticLoadBalancingV2::Listener',
+    'AWS::ElasticLoadBalancingV2::TargetGroup',
+    'AWS::Route53::RecordSet',
+    'AWS::SSM::Parameter',
+]
+
+def test_frontend_resources_created():
+    for resource in frontend_resources:
+      assert(resource in get_templates().get('FrontendStack'))
