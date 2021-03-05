@@ -41,6 +41,10 @@ class DbStack(core.Stack):
             engine = rds.DatabaseInstanceEngine.sql_server_se(
                 version=rds.SqlServerEngineVersion.VER_15
             )
+        if self.DATABASE_ENGINE == 'mariadb':
+            engine = rds.DatabaseInstanceEngine.maria_db(
+                version=rds.MariaDbEngineVersion.VER_10_4_13
+            )
 
         db = rds.DatabaseInstance(
             self,
@@ -55,7 +59,7 @@ class DbStack(core.Stack):
             security_groups=[db_sg]
         )
 
-        #db_secret_rotation_schedule = Secret
+        #db_secret_rotation_schedule = Secret.
 
         #db.secret.add_rotation_schedule(automatically_after=Duration.days(30))
         
