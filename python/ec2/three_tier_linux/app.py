@@ -15,7 +15,7 @@ DEPLOYMENT_ACCOUNT='123456789012'
 DEPLOYMENT_REGION='us-west-2'
 BACKEND_PORT=80
 DB_PORT=3306
-# choices ['mysql', 'sqlserver']
+# choices ['mysql', 'sqlserver', 'mariadb']
 DATABASE_ENGINE='mysql'
 
 constants = {}
