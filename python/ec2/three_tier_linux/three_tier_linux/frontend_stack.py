@@ -185,7 +185,7 @@ class FrontendStack(core.Stack):
         # In this case, it is our VPC and subnets.
         self.output_props = props.copy()
         self.output_props['application_layer_sg_id'] = instance_sg.security_group_id
-        self.output_props['application_layer_instanc_profile_role_arn'] = role.role_arn
+        self.output_props['application_layer_instance_profile_role_arn'] = role.role_arn
 
         @property
         def outputs(self):

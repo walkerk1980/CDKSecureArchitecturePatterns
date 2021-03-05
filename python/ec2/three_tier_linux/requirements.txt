@@ -9,3 +9,4 @@ aws-cdk.aws_elasticloadbalancingv2
 aws-cdk.aws_certificatemanager
 aws-cdk.aws_route53
 aws-cdk.aws_route53-targets
+aws-cdk.aws_secretsmanager
