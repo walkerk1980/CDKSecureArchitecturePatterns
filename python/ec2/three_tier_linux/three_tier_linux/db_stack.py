@@ -24,8 +24,11 @@ class DbStack(core.Stack):
         )
 
         db_sg.add_ingress_rule(
-            peer=ec2.Peer.ipv4("10.0.0.0/16"),
-            connection=ec2.Port.tcp(int(constants.get('BACKEND_PORT')))
+            peer=ec2.SecurityGroup.from_security_group_id(
+                self,
+                id='db_sg_rule_traffic_from_application_layer',
+                security_group_id=props['application_layer_sg_id']),
+            connection=ec2.Port.tcp(int(constants.get('DB_PORT')))
         )
 
         engine = ''
@@ -50,4 +53,13 @@ class DbStack(core.Stack):
             removal_policy=core.RemovalPolicy.DESTROY,
             security_groups=[db_sg]
         )
+
+        #db.secret.add_rotation_schedule(automatically_after=Duration.days(30))
         
+        db.secret.grant_read(
+            grantee=iam.Role.from_role_arn(
+                self,
+                'application_layer_instanc_profile_role',
+                role_arn=props['application_layer_instanc_profile_role_arn']
+            )
+        )
