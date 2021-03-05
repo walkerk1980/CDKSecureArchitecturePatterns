@@ -21,8 +21,11 @@ class NetworkStack(core.Stack):
 
         # VPC
         vpc = ec2.Vpc(self, "{0}PublicVPC1".format(self.APP_NAME),
-            nat_gateways=0,
-            subnet_configuration=[ec2.SubnetConfiguration(name="public",subnet_type=ec2.SubnetType.PUBLIC)]
+            nat_gateways=1,
+            subnet_configuration=[
+                ec2.SubnetConfiguration(name="public",subnet_type=ec2.SubnetType.PUBLIC),
+                ec2.SubnetConfiguration(name="private",subnet_type=ec2.SubnetType.PRIVATE)
+            ]
         )
 
         # This will export the VPC's ID in CloudFormation under the key
@@ -38,5 +41,3 @@ class NetworkStack(core.Stack):
         @property
         def outputs(self):
             return self.output_props
-
-

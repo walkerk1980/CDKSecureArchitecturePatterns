@@ -23,17 +23,25 @@ class DbStack(core.Stack):
                 security_group_name="{0}sg_rds".format(self.APP_NAME)
         )
 
-        db_sg.add_ingress_rule(s
+        db_sg.add_ingress_rule(
             peer=ec2.Peer.ipv4("10.0.0.0/16"),
             connection=ec2.Port.tcp(int(constants.get('BACKEND_PORT')))
         )
 
+        engine = ''
+        if self.DATABASE_ENGINE == 'mysql':
+            engine = rds.DatabaseInstanceEngine.mysql(
+                version=rds.MysqlEngineVersion.VER_8_0_21
+            )
+        if self.DATABASE_ENGINE == 'sqlserver':
+            engine = rds.DatabaseInstanceEngine.sql_server_se(
+                version=rds.SqlServerEngineVersion.VER_15
+            )
+
         db = rds.DatabaseInstance(
             self,
             id="db",
-            engine=rds.DatabaseInstanceEngine.sql_server_se(
-                version=rds.SqlServerEngineVersion.VER_15
-            ),
+            engine=engine,
             vpc=props['vpc'],
             instance_type=ec2.InstanceType.of(
                 ec2.InstanceClass.BURSTABLE2,

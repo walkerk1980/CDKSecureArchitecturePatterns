@@ -177,3 +177,15 @@ class FrontendStack(core.Stack):
         #    listener=
         #)
 
+        # This will export the VPC's ID in CloudFormation under the key
+        # 'vpcid'
+        #core.CfnOutput(self, "vpcid", value=vpc.vpc_id)
+
+        # Prepares output attributes to be passed into other stacks
+        # In this case, it is our VPC and subnets.
+        self.output_props = props.copy()
+        #self.output_props['subnets'] = vpc.public_subnets
+
+        @property
+        def outputs(self):
+            return self.output_props
