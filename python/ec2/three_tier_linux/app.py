@@ -14,7 +14,7 @@ HOSTED_ZONE_DOMAIN = 'preprod.example.net'
 DEPLOYMENT_ACCOUNT='123456789012'
 DEPLOYMENT_REGION='us-west-2'
 BACKEND_PORT=80
-DB_PORT=3306
+# DB_PORT=3306
 # choices ['mysql', 'sqlserver', 'mariadb']
 DATABASE_ENGINE='mysql'
 
@@ -25,7 +25,7 @@ constants.update({'HOSTED_ZONE_DOMAIN': HOSTED_ZONE_DOMAIN})
 constants.update({'DEPLOYMENT_ACCOUNT': DEPLOYMENT_ACCOUNT})
 constants.update({'DEPLOYMENT_REGION': DEPLOYMENT_REGION})
 constants.update({'BACKEND_PORT': BACKEND_PORT})
-constants.update({'DB_PORT': DB_PORT})
+# constants.update({'DB_PORT': DB_PORT})
 constants.update({'DATABASE_ENGINE': DATABASE_ENGINE})
 
 props = {'namespace': 'NetworkStack'}
