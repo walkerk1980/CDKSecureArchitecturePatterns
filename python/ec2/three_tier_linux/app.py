@@ -17,6 +17,7 @@ BACKEND_PORT=80
 # DB_PORT=3306
 # choices ['mysql', 'sqlserver', 'mariadb']
 DATABASE_ENGINE='mysql'
+SECRET_ROTATION=False
 
 constants = {}
 constants.update({'APP_NAME': APP_NAME})
@@ -27,6 +28,7 @@ constants.update({'DEPLOYMENT_REGION': DEPLOYMENT_REGION})
 constants.update({'BACKEND_PORT': BACKEND_PORT})
 # constants.update({'DB_PORT': DB_PORT})
 constants.update({'DATABASE_ENGINE': DATABASE_ENGINE})
+constants.update({'SECRET_ROTATION': SECRET_ROTATION})
 
 props = {'namespace': 'NetworkStack'}
 

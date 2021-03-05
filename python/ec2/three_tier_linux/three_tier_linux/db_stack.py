@@ -72,12 +72,13 @@ class DbStack(core.Stack):
             )
         )
 
-        db.secret.add_rotation_schedule(
-            'rotation_schedule',
-            hosted_rotation=hosted_rotation
-        )
-        
-        db.connections.allow_default_port_from(hosted_rotation)
+        if self.SECRET_ROTATION == True:
+            db.secret.add_rotation_schedule(
+                'rotation_schedule',
+                hosted_rotation=hosted_rotation
+            )
+            
+            db.connections.allow_default_port_from(hosted_rotation)
 
         db.secret.grant_read(
             grantee=iam.Role.from_role_arn(
