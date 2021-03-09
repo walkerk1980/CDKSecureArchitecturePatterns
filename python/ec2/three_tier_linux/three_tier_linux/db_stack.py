@@ -71,6 +71,9 @@ class DbStack(core.Stack):
                 key_arn=self.DATABASE_ENCRYPTION_KEY
             )
 
+        # TODO: Use Option Groups to harden DB Instances
+        # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.SQLServer.Options.html
+
         # Create RDS DB instance
         db = rds.DatabaseInstance(
             self,
