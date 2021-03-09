@@ -11,6 +11,7 @@ from aws_cdk import (
     aws_route53 as r53,
     aws_route53_targets as r53_targets,
     aws_autoscaling as autoscaling,
+    aws_kms as kms,
     core
 )
 

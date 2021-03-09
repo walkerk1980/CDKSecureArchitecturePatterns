@@ -12,3 +12,4 @@ aws-cdk.aws_route53
 aws-cdk.aws_route53-targets
 aws-cdk.aws_secretsmanager
 aws-cdk.aws_autoscaling
+aws-cdk.aws_kms

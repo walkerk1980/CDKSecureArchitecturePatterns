@@ -9,21 +9,23 @@ from three_tier_linux.db_stack import DbStack
 
 # Constants
 APP_NAME = 'three-tier-linux'
-APP_DOMAIN = 'cdk.preprod.example.net'
+APP_DOMAIN = 'cdk.waftest.4nelnet.net'
 # Hosted Zone must already exist
 # to create ACM Certificate DNS validation CNAME
 # and www A (Alias) resource records
-HOSTED_ZONE_DOMAIN = 'preprod.example.net'
-DEPLOYMENT_ACCOUNT='123456789012'
-DEPLOYMENT_REGION='us-west-2'
-BACKEND_PORT=80
+HOSTED_ZONE_DOMAIN = 'waftest.4nelnet.net'
+DEPLOYMENT_ACCOUNT = '091733492089'
+DEPLOYMENT_REGION = 'us-west-2'
+BACKEND_PORT = 80
 # choices ['mysql', 'sqlserver', 'mariadb']
-DATABASE_ENGINE='mysql'
+DATABASE_ENGINE = 'mysql'
 # choices ['retain', 'snapshot', 'destroy']
-DATABASE_REMOVAL_POLICY='destroy'
-SECRET_ROTATION=False
+DATABASE_REMOVAL_POLICY = 'destroy'
+# choices ['RDS_SERVICE_KEY', 'encryption_key_arn']
+DATABASE_ENCRYPTION_KEY = 'RDS_SERVICE_KEY'
+SECRET_ROTATION = False
 # choices ['create_new_vpc', 'existing_vpc_name']
-VPC='create_new_vpc'
+VPC = 'Custom_VPC'
 
 constants = {}
 constants.update({'APP_NAME': APP_NAME})
@@ -34,6 +36,7 @@ constants.update({'DEPLOYMENT_REGION': DEPLOYMENT_REGION})
 constants.update({'BACKEND_PORT': BACKEND_PORT})
 constants.update({'DATABASE_ENGINE': DATABASE_ENGINE})
 constants.update({'DATABASE_REMOVAL_POLICY': DATABASE_REMOVAL_POLICY})
+constants.update({'DATABASE_ENCRYPTION_KEY': DATABASE_ENCRYPTION_KEY})
 constants.update({'SECRET_ROTATION': SECRET_ROTATION})
 constants.update({'VPC': VPC})
 

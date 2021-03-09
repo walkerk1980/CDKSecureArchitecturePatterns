@@ -4,6 +4,7 @@ from aws_cdk import (
     aws_ec2 as ec2,
     aws_secretsmanager as sm,
     aws_autoscaling as autoscaling,
+    aws_kms as kms,
     core
 )
 
@@ -61,6 +62,15 @@ class DbStack(core.Stack):
         elif self.DATABASE_REMOVAL_POLICY == 'destroy':
             database_removal_policy = core.RemovalPolicy.DESTROY
 
+        # Choose between service CMK and Customer Managed CMK
+        if self.DATABASE_ENCRYPTION_KEY == 'RDS_SERVICE_KEY':
+            db_kms_key_arn = None
+        else:
+            db_kms_key_arn = kms.Key.from_key_arn(
+                "db_kms_key_arn",
+                key_arn=self.DATABASE_ENCRYPTION_KEY
+            )
+
         # Create RDS DB instance
         db = rds.DatabaseInstance(
             self,
@@ -72,7 +82,8 @@ class DbStack(core.Stack):
                 ec2.InstanceSize.LARGE
             ),
             removal_policy=database_removal_policy,
-            storage_encrypted=True
+            storage_encrypted=True,
+            storage_encryption_key=db_kms_key_arn,
             #security_groups=[db_sg]
         )
 
