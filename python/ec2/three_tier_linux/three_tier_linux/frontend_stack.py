@@ -6,9 +6,11 @@ from aws_cdk import (
     aws_ec2 as ec2,
     aws_iam as iam,
     aws_elasticloadbalancingv2 as elbv2,
+    # aws_elasticloadbalancingv2_targets as elbv2_targets,
     aws_certificatemanager as acm,
     aws_route53 as r53,
     aws_route53_targets as r53_targets,
+    aws_autoscaling as autoscaling,
     core
 )
 
@@ -43,13 +45,13 @@ class FrontendStack(core.Stack):
         base_ami = amzn_linux
 
         # Instance Role and SSM Managed Policy
-        role = iam.Role(self, "InstanceSSM", assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"))
+        role = iam.Role(self, 'InstanceSSM', assumed_by=iam.ServicePrincipal('ec2.amazonaws.com'))
 
-        role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore"))
-        role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMDirectoryServiceAccess"))
+        role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSSMManagedInstanceCore'))
+        role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSSMDirectoryServiceAccess'))
         role.add_managed_policy(
             iam.ManagedPolicy.from_managed_policy_name(self, id='LogsPolicy',
-                managed_policy_name="CloudwatchLogsInstanceProfile"
+                managed_policy_name='CloudwatchLogsInstanceProfile'
             )
         )
 
@@ -62,44 +64,9 @@ class FrontendStack(core.Stack):
             allow_all_outbound=True
         )
 
-        # TODO AutoScalingGroups instead of Instances
-        # Instances
-        instance1 = ec2.Instance(self, "{0}Instance1".format(self.APP_NAME),
-            instance_type=ec2.InstanceType("t3.nano"),
-            machine_image=base_ami,
-            vpc=vpc,
-            role = role,
-            security_group=instance_sg
-        )
-
-        instance2 = ec2.Instance(self, "{0}Instance2".format(self.APP_NAME),
-            instance_type=ec2.InstanceType("t3.nano"),
-            machine_image=base_ami,
-            vpc=vpc,
-            role = role,
-            security_group=instance_sg
-        )
-
-        instances = [ instance1, instance2]
-
-        # Script in S3 as Asset
-        asset = Asset(self, "{0}Asset".format(self.APP_NAME), path=os.path.join(dirname, "configure.sh"))
-        for instance in instances:
-            local_path = instance.user_data.add_s3_download_command(
-                bucket=asset.bucket,
-                bucket_key=asset.s3_object_key
-            )
-
-        # Userdata executes script from S3
-        for instance in instances:
-            instance.user_data.add_execute_file_command(
-                file_path=local_path
-            )
-            asset.grant_read(instance.role)
-
         # ACM Certificate for application frontend
         acm_cert = acm.Certificate(
-            self, "{}Certificate".format(self.APP_NAME),
+            self, '{}Certificate'.format(self.APP_NAME),
             domain_name=self.APP_DOMAIN,
             subject_alternative_names=['www.{}'.format(self.APP_DOMAIN)],
             validation_method=acm.ValidationMethod.DNS
@@ -114,34 +81,25 @@ class FrontendStack(core.Stack):
         )
 
         # Application Load Balancer to front Instance
-        alb = elbv2.ApplicationLoadBalancer(self, "{0}LoadBalancer".format(self.APP_NAME),
+        alb = elbv2.ApplicationLoadBalancer(self, '{0}LoadBalancer'.format(self.APP_NAME),
             vpc=vpc,
             internet_facing=True,
             security_group=alb_sg
         )
 
-        target_group = elbv2.ApplicationTargetGroup(self, "{0}TargetGroup".format(self.APP_NAME),
-            port=self.BACKEND_PORT,
-            vpc=vpc
-        )
-
-        # Add standalone instances to target group for now
-        for instance in instances:
-            target_group.add_target(
-                elbv2.InstanceTarget(instance.instance_id)
-            )
-
-        alb.add_listener(
+        http_listener = alb.add_listener(
             id='http',
-            default_target_groups=[target_group],
             port=80
         )
 
-        alb.add_listener(
-            id='https',
-            default_target_groups=[target_group],
-            port=443,
-            certificates=[acm_cert]
+        http_listener.add_redirect_response(
+            'redirect_http_to_https',
+            status_code='HTTP_301',
+            #host='#{host}',
+            #path='/#{path}',
+            #query='#{query}',
+            port='443',
+            protocol='HTTPS'
         )
 
         # Allow traffic from ALB SG to Instance SG
@@ -153,7 +111,7 @@ class FrontendStack(core.Stack):
 
         # DNS record for ALB
         hosted_zone = r53.HostedZone.from_lookup(
-            self, "AppHostedZone",
+            self, 'AppHostedZone',
             domain_name=self.HOSTED_ZONE_DOMAIN
         )
 
@@ -169,23 +127,66 @@ class FrontendStack(core.Stack):
             zone=hosted_zone
         )
 
-        # TODO
-        # Redirect HTTP to HTTPS
-        #https_redirect = elbv2.ApplicationListenerRule(
-        #    self, 'HTTPSRedirect',
-        #    priority=1,
-        #    listener=
-        #)
+        # Instance AutoScalingGroup
+        instance_asg = autoscaling.AutoScalingGroup(
+            self,
+            'instance_asg',
+            vpc=vpc,
+            instance_type=ec2.InstanceType('t3.nano'),
+            role=role,
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
+            security_group=instance_sg,
+            machine_image=amzn_linux,
+            health_check=autoscaling.HealthCheck.elb(grace=core.Duration.seconds(120)),
+            min_capacity=2,
+            max_capacity=7
+        )
 
-        # This will export the VPC's ID in CloudFormation under the key
-        # 'vpcid'
-        #core.CfnOutput(self, "vpcid", value=vpc.vpc_id)
+        instance_tg_health_check = elbv2.HealthCheck(
+            protocol=elbv2.Protocol('HTTP'),
+            path='/',
+            port='traffic-port',
+            healthy_threshold_count=2,
+            unhealthy_threshold_count=2,
+            timeout=core.Duration.seconds(5),
+            interval=core.Duration.seconds(30),
+            healthy_http_codes='200',
+        )
+
+        instance_tg = elbv2.ApplicationTargetGroup(
+            self,
+            '{0}TargetGroup'.format(self.APP_NAME),
+            port=self.BACKEND_PORT,
+            vpc=vpc,
+            targets=[instance_asg],
+            health_check=instance_tg_health_check
+        )
+
+        https_listener = alb.add_listener(
+            id='https',
+            port=443,
+            certificates=[acm_cert],
+            default_target_groups=[instance_tg]
+        )
+
+        # Script in S3 as Asset
+        asset = Asset(self, '{0}Asset'.format(self.APP_NAME), path=os.path.join(dirname, 'configure.sh'))
+        local_path = instance_asg.user_data.add_s3_download_command(
+            bucket=asset.bucket,
+            bucket_key=asset.s3_object_key
+        )
+
+        # Userdata executes script from S3
+        instance_asg.user_data.add_execute_file_command(
+            file_path=local_path
+        )
+        asset.grant_read(instance_asg.role)
 
         # Prepares output attributes to be passed into other stacks
-        # In this case, it is our VPC and subnets.
         self.output_props = props.copy()
         self.output_props['application_layer_sg_id'] = instance_sg.security_group_id
         self.output_props['application_layer_instance_profile_role_arn'] = role.role_arn
+        self.output_props['instance_asg_name'] = instance_asg.auto_scaling_group_name
 
         @property
         def outputs(self):

@@ -1,4 +1,3 @@
-
 from aws_cdk import (
     aws_ec2 as ec2,
     aws_iam as iam,
@@ -20,23 +19,30 @@ class NetworkStack(core.Stack):
         common.functions.unpack_constants_dict(self, constants)
 
         # VPC
-        vpc = ec2.Vpc(self, "{0}PublicVPC1".format(self.APP_NAME),
-            nat_gateways=1,
-            subnet_configuration=[
-                ec2.SubnetConfiguration(name="public",subnet_type=ec2.SubnetType.PUBLIC),
-                ec2.SubnetConfiguration(name="private",subnet_type=ec2.SubnetType.PRIVATE)
-            ]
-        )
+        if self.VPC == 'create_new_vpc':
+            vpc = ec2.Vpc(self, '{0}VPC'.format(self.APP_NAME),
+                nat_gateways=3,
+                subnet_configuration=[
+                    ec2.SubnetConfiguration(name='public',subnet_type=ec2.SubnetType.PUBLIC),
+                    ec2.SubnetConfiguration(name='private',subnet_type=ec2.SubnetType.PRIVATE),
+                ]
+            )
+        else:
+            vpc = ec2.Vpc.from_lookup(
+                "imported_vpc",
+                vpc_name=self.VPC
+            )
 
         # This will export the VPC's ID in CloudFormation under the key
         # 'vpcid'
-        core.CfnOutput(self, "vpcid", value=vpc.vpc_id)
+        core.CfnOutput(self, 'vpcid', value=vpc.vpc_id)
 
         # Prepares output attributes to be passed into other stacks
         # In this case, it is our VPC and subnets.
         self.output_props = props.copy()
         self.output_props['vpc'] = vpc
-        self.output_props['subnets'] = vpc.public_subnets
+        self.output_props['public_subnets'] = vpc.public_subnets
+        self.output_props['private_subnets'] = vpc.private_subnets
 
         @property
         def outputs(self):

@@ -6,7 +6,9 @@ aws-cdk.aws_iam
 aws-cdk.aws_rds
 aws-cdk.aws_s3_assets
 aws-cdk.aws_elasticloadbalancingv2
+aws-cdk.aws_elasticloadbalancingv2_targets
 aws-cdk.aws_certificatemanager
 aws-cdk.aws_route53
 aws-cdk.aws_route53-targets
 aws-cdk.aws_secretsmanager
+aws-cdk.aws_autoscaling
