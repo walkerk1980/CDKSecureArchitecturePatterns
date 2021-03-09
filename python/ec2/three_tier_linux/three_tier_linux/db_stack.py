@@ -72,6 +72,7 @@ class DbStack(core.Stack):
                 ec2.InstanceSize.LARGE
             ),
             removal_policy=database_removal_policy,
+            storage_encrypted=True
             #security_groups=[db_sg]
         )
 
