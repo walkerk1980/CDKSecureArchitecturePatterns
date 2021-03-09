@@ -87,6 +87,7 @@ class FrontendStack(core.Stack):
             security_group=alb_sg
         )
 
+        # Add http listerner and redirect to https
         http_listener = alb.add_listener(
             id='http',
             port=80
@@ -115,11 +116,11 @@ class FrontendStack(core.Stack):
             domain_name=self.HOSTED_ZONE_DOMAIN
         )
 
+        # Create an Alias record of www to point at ALB
         alb_target = r53_targets.LoadBalancerTarget(alb)
         alb_record_target = r53.RecordTarget(
             alias_target=alb_target
         )
-
         www_alias_record = r53.ARecord(
             self, '{}AliasRecord'.format(self.APP_NAME),
             record_name='www.{0}'.format(self.APP_DOMAIN),
@@ -142,6 +143,7 @@ class FrontendStack(core.Stack):
             max_capacity=7
         )
 
+        # Health check for Target Group
         instance_tg_health_check = elbv2.HealthCheck(
             protocol=elbv2.Protocol('HTTP'),
             path='/',
@@ -153,6 +155,7 @@ class FrontendStack(core.Stack):
             healthy_http_codes='200',
         )
 
+        # Application Target Group
         instance_tg = elbv2.ApplicationTargetGroup(
             self,
             '{0}TargetGroup'.format(self.APP_NAME),
@@ -162,21 +165,21 @@ class FrontendStack(core.Stack):
             health_check=instance_tg_health_check
         )
 
+        # Add HTTPS listener to ALB
         https_listener = alb.add_listener(
             id='https',
             port=443,
             certificates=[acm_cert],
-            default_target_groups=[instance_tg]
+            default_target_groups=[instance_tg],
+            ssl_policy=elbv2.SslPolicy.FORWARD_SECRECY_TLS12_RES_GCM
         )
 
-        # Script in S3 as Asset
+        # Script in S3 as Asset to Instance Userdata
         asset = Asset(self, '{0}Asset'.format(self.APP_NAME), path=os.path.join(dirname, 'configure.sh'))
         local_path = instance_asg.user_data.add_s3_download_command(
             bucket=asset.bucket,
             bucket_key=asset.s3_object_key
         )
-
-        # Userdata executes script from S3
         instance_asg.user_data.add_execute_file_command(
             file_path=local_path
         )
