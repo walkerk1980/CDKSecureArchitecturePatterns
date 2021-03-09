@@ -21,7 +21,6 @@ class NetworkStack(core.Stack):
         # VPC
         if self.VPC == 'create_new_vpc':
             vpc = ec2.Vpc(self, '{0}VPC'.format(self.APP_NAME),
-                nat_gateways=3,
                 subnet_configuration=[
                     ec2.SubnetConfiguration(name='public',subnet_type=ec2.SubnetType.PUBLIC),
                     ec2.SubnetConfiguration(name='private',subnet_type=ec2.SubnetType.PRIVATE),
