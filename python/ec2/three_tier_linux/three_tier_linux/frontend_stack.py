@@ -153,7 +153,8 @@ class FrontendStack(core.Stack):
             machine_image=base_ami,
             health_check=autoscaling.HealthCheck.elb(grace=core.Duration.seconds(150)),
             min_capacity=2,
-            max_capacity=7
+            max_capacity=7,
+            max_instance_lifetime=core.Duration.days(7)
         )
 
         # Health check for Target Group
@@ -164,7 +165,7 @@ class FrontendStack(core.Stack):
             healthy_threshold_count=2,
             unhealthy_threshold_count=2,
             timeout=core.Duration.seconds(5),
-            interval=core.Duration.seconds(45),
+            interval=core.Duration.seconds(30),
             healthy_http_codes='200',
         )
 

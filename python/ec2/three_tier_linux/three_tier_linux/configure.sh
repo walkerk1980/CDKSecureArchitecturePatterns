@@ -6,6 +6,7 @@ exec > >(tee /var/log/user-data.log) 2>&1
     systemctl enable docker
     # usermod -a -G docker ec2-user
     systemctl start docker
+    sleep 20
 
     # put apache container service in place during development
     # TODO: switch to service that uses RDS database credentials
