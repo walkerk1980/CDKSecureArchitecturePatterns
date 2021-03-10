@@ -43,7 +43,19 @@ class FrontendStack(core.Stack):
             version=ec2.WindowsVersion.WINDOWS_SERVER_2019_ENGLISH_CORE_BASE
         )
 
+        # Custom Image
+        ami_owner = self.BASE_AMI_ACCOUNT
+        if ami_owner == 'SELF':
+            ami_owner = None
+
         base_ami = amzn_linux
+        if self.BASE_AMI_NAME != 'AWS_PROVIDED':
+            custom_ami = ec2.LookupMachineImage(
+                name=self.BASE_AMI_NAME,
+                owners=[ami_owner],
+                windows=False,
+            )
+            base_ami = custom_ami
 
         # Instance Role and SSM Managed Policy
         role = iam.Role(self, 'InstanceSSM', assumed_by=iam.ServicePrincipal('ec2.amazonaws.com'))
@@ -138,8 +150,8 @@ class FrontendStack(core.Stack):
             role=role,
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
             security_group=instance_sg,
-            machine_image=amzn_linux,
-            health_check=autoscaling.HealthCheck.elb(grace=core.Duration.seconds(120)),
+            machine_image=base_ami,
+            health_check=autoscaling.HealthCheck.elb(grace=core.Duration.seconds(150)),
             min_capacity=2,
             max_capacity=7
         )
@@ -152,7 +164,7 @@ class FrontendStack(core.Stack):
             healthy_threshold_count=2,
             unhealthy_threshold_count=2,
             timeout=core.Duration.seconds(5),
-            interval=core.Duration.seconds(30),
+            interval=core.Duration.seconds(45),
             healthy_http_codes='200',
         )
 
