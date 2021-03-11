@@ -5,6 +5,7 @@ from aws_cdk import (
     aws_secretsmanager as sm,
     aws_autoscaling as autoscaling,
     aws_kms as kms,
+    aws_ssm as ssm,
     core
 )
 
@@ -87,6 +88,7 @@ class DbStack(core.Stack):
             removal_policy=database_removal_policy,
             storage_encrypted=True,
             storage_encryption_key=db_kms_key_arn,
+            database_name=self.APP_NAME.replace('-', '')
             #security_groups=[db_sg]
         )
 
@@ -102,22 +104,34 @@ class DbStack(core.Stack):
         # Rotate secret every 30 days
         if self.SECRET_ROTATION == True:
             db.secret.add_rotation_schedule(
-                'rotation_schedule',
+                'RotationSchedule',
                 hosted_rotation=hosted_rotation
             )
             db.connections.allow_default_port_from(hosted_rotation)
 
         # Allow App Instances to read DB secret
-        db.secret.grant_read(
-            grantee=iam.Role.from_role_arn(
-                self,
-                'application_layer_instance_profile_role',
-                role_arn=props['application_layer_instance_profile_role_arn']
-            )
+        application_layer_instance_profile_role = iam.Role.from_role_arn(
+            self,
+            'ApplicationLayerInstanceProfileRole',
+            role_arn=props['application_layer_instance_profile_role_arn']
         )
+        db.secret.grant_read(
+            grantee=application_layer_instance_profile_role
+        )
+
+        # Parameter so that Instances know the name of the
+        # secret value to get to connect to DB
+        db_secret_id_ssm_parameter = ssm.StringParameter(
+            self,
+            'DbSecretIdSsmParameter',
+            parameter_name='/{0}/db_secret'.format(self.APP_NAME),
+            string_value=str(db.secret.secret_name),
+            description='Name of Secret App should pull for DB access'
+        )
+        db_secret_id_ssm_parameter.grant_read(application_layer_instance_profile_role)
 
         application_instance_asg = autoscaling.AutoScalingGroup.from_auto_scaling_group_name(
             self,
-            id='instance_asg_import',
+            'InstanceAsgImport',
             auto_scaling_group_name=INSTANCE_ASG_NAME
         )

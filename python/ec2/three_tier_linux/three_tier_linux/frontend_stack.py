@@ -107,7 +107,7 @@ class FrontendStack(core.Stack):
         )
 
         http_listener.add_redirect_response(
-            'redirect_http_to_https',
+            'RedirectHttpToHttps',
             status_code='HTTP_301',
             #host='#{host}',
             #path='/#{path}',
@@ -144,18 +144,19 @@ class FrontendStack(core.Stack):
         # Instance AutoScalingGroup
         instance_asg = autoscaling.AutoScalingGroup(
             self,
-            'instance_asg',
+            'InstanceAsg',
             vpc=vpc,
-            instance_type=ec2.InstanceType('t3.nano'),
+            instance_type=ec2.InstanceType('t3.micro'),
             role=role,
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
             security_group=instance_sg,
             machine_image=base_ami,
-            health_check=autoscaling.HealthCheck.elb(grace=core.Duration.seconds(150)),
+            health_check=autoscaling.HealthCheck.elb(grace=core.Duration.seconds(120)),
             min_capacity=2,
             max_capacity=7,
             max_instance_lifetime=core.Duration.days(7)
         )
+        core.Tags.of(instance_asg).add('Patch Group', 'Immutable')
 
         # Health check for Target Group
         instance_tg_health_check = elbv2.HealthCheck(
@@ -163,7 +164,7 @@ class FrontendStack(core.Stack):
             path='/',
             port='traffic-port',
             healthy_threshold_count=2,
-            unhealthy_threshold_count=2,
+            unhealthy_threshold_count=3,
             timeout=core.Duration.seconds(5),
             interval=core.Duration.seconds(30),
             healthy_http_codes='200',
@@ -181,7 +182,7 @@ class FrontendStack(core.Stack):
 
         # Add HTTPS listener to ALB
         https_listener = alb.add_listener(
-            id='https',
+            'Https',
             port=443,
             certificates=[acm_cert],
             default_target_groups=[instance_tg],

@@ -29,7 +29,7 @@ class NetworkStack(core.Stack):
         else:
             vpc = ec2.Vpc.from_lookup(
                 self,
-                "imported_vpc",
+                "ImportedVpc",
                 vpc_name=self.VPC
             )
 
