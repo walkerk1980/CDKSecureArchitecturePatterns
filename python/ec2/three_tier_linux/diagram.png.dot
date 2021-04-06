@@ -1,0 +1,265 @@
+digraph "Diagram" {
+  splines = "ortho";
+  pad = "1.0";
+  nodesep = "0.60";
+  ranksep = "0.75";
+  fontname = "Sans-Serif";
+  fontsize = "15";
+  dpi = "200";
+  rankdir = "BT";
+  compound = "true";
+  fontcolor = "#222222";
+  edge [
+    color = "#D5871488",
+    penwidth = 2,
+    arrowhead = "dot",
+    arrowtail = "dot",
+  ];
+  node [
+    shape = "box",
+    style = "rounded",
+    fixedsize = true,
+    width = 1.7,
+    height = 1.7,
+    labelloc = "c",
+    imagescale = true,
+    fontname = "Sans-Serif",
+    fontsize = 8,
+    margin = 8,
+  ];
+  subgraph "App" {
+    subgraph "cluster-SubGraph.App" {
+      graph [
+        label = "App",
+        labelloc = "b",
+        labeljust = "l",
+        margin = "10",
+        fontsize = "16",
+        penwidth = "2",
+        pencolor = "#888888",
+        style = "filled,rounded",
+        fillcolor = "#f3f3f3",
+      ];
+      subgraph "cluster-SubGraph.three-tier-linux-FrontendStack" {
+        graph [
+          label = "three-tier-linux-FrontendStack",
+          labelloc = "b",
+          labeljust = "l",
+          margin = "10",
+          fontsize = "16",
+          penwidth = "2",
+          pencolor = "#888888",
+          style = "filled,rounded",
+          fillcolor = "#e4e4e4",
+        ];
+        "three-tier-linux-FrontendStack/InstanceSSM" [
+          label = " InstanceSSM",
+          fontsize = 12,
+          image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Security-Identity-Compliance/64/Arch_AWS-Identity-and-Access-Management_64@5x.png",
+          imagescale = "true",
+          imagepos = "tc",
+          penwidth = "0",
+          shape = "node",
+          fixedsize = "true",
+          labelloc = "b",
+          width = 1.2,
+          height = 1.466,
+        ];
+        "three-tier-linux-FrontendStack/three-tier-linuxInstanceSecurityGroup" [
+          label = " three tier\nlinuxInstanceSecurity",
+          fontsize = 12,
+        ];
+        "three-tier-linux-FrontendStack/three-tier-linuxCertificate" [
+          label = " three tier\nlinuxCertificate",
+          fontsize = 12,
+          image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Security-Identity-Compliance/64/Arch_AWS-Certificate-Manager_64@5x.png",
+          imagescale = "true",
+          imagepos = "tc",
+          penwidth = "0",
+          shape = "node",
+          fixedsize = "true",
+          labelloc = "b",
+          width = 1.2,
+          height = 1.682,
+        ];
+        "three-tier-linux-FrontendStack/three-tier-linuxALBSecurityGroup" [
+          label = " three tier\nlinuxALBSecurityGroup",
+          fontsize = 12,
+        ];
+        "three-tier-linux-FrontendStack/three-tier-linuxLoadBalancer" [
+          label = " three tier\nlinuxLoadBalancer",
+          fontsize = 12,
+          image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Networking-Content/64/Arch_Elastic-Load-Balancing_64@5x.png",
+          imagescale = "true",
+          imagepos = "tc",
+          penwidth = "0",
+          shape = "node",
+          fixedsize = "true",
+          labelloc = "b",
+          width = 2,
+          height = 2.4819999999999998,
+        ];
+        "three-tier-linux-FrontendStack/three-tier-linuxAliasRecord" [
+          label = " three tier\nlinuxAliasRecord",
+          fontsize = 12,
+          image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Resource/Res_Networking-and-Content-Delivery/Res_48_Dark/Res_Amazon-Route-53-Hosted-Zone_48_Dark_gen.png",
+          imagescale = "true",
+          imagepos = "tc",
+          penwidth = "0",
+          shape = "node",
+          fixedsize = "true",
+          labelloc = "b",
+          width = 1.2,
+          height = 1.682,
+        ];
+        "three-tier-linux-FrontendStack/three-tier-linuxTargetGroup" [
+          label = " three tier\nlinuxTargetGroup",
+          fontsize = 12,
+          image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Resource/Res_Networking-and-Content-Delivery/Res_48_Dark/Res_Elastic-Load-Balancing_Application-Load-Balancer_48_Dark_gen.png",
+          imagescale = "true",
+          imagepos = "tc",
+          penwidth = "0",
+          shape = "node",
+          fixedsize = "true",
+          labelloc = "b",
+          width = 1.2,
+          height = 1.682,
+        ];
+        subgraph "cluster-SubGraph.InstanceAsg" {
+          graph [
+            label = "InstanceAsg",
+            labelloc = "b",
+            labeljust = "l",
+            margin = "10",
+            fontsize = "16",
+            penwidth = "2",
+            pencolor = "#888888",
+            style = "filled,rounded",
+            fillcolor = "#d6d6d6",
+          ];
+          "three-tier-linux-FrontendStack/InstanceAsg/InstanceProfile" [
+            label = " IAM InstanceProfile\nInstanceProfile",
+            fontsize = 12,
+            image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Resource/Res_Security-Identity-and-Compliance/Res_48_Dark/Res_AWS-Identity-Access-Management_Permissions_48_Dark_gen.png",
+            imagescale = "true",
+            imagepos = "tc",
+            penwidth = "0",
+            shape = "node",
+            fixedsize = "true",
+            labelloc = "b",
+            width = 2,
+            height = 2.4819999999999998,
+          ];
+          "three-tier-linux-FrontendStack/InstanceAsg/LaunchConfig" [
+            label = " AutoScaling\nLaunchConfiguration\nLaunchConfig",
+            fontsize = 12,
+            image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_Amazon-EC2-Auto-Scaling_64@5x.png",
+            imagescale = "true",
+            imagepos = "tc",
+            penwidth = "0",
+            shape = "node",
+            fixedsize = "true",
+            labelloc = "b",
+            width = 1.2,
+            height = 1.898,
+          ];
+          "three-tier-linux-FrontendStack/InstanceAsg/ASG" [
+            label = " AutoScaling\nAutoScalingGroup ASG",
+            fontsize = 12,
+            image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_Amazon-EC2-Auto-Scaling_64@5x.png",
+            imagescale = "true",
+            imagepos = "tc",
+            penwidth = "0",
+            shape = "node",
+            fixedsize = "true",
+            labelloc = "b",
+            width = 2,
+            height = 2.4819999999999998,
+          ];
+        }
+      }
+      subgraph "cluster-SubGraph.three-tier-linux-DbStack" {
+        graph [
+          label = "three-tier-linux-DbStack",
+          labelloc = "b",
+          labeljust = "l",
+          margin = "10",
+          fontsize = "16",
+          penwidth = "2",
+          pencolor = "#888888",
+          style = "filled,rounded",
+          fillcolor = "#e4e4e4",
+        ];
+        "three-tier-linux-DbStack/db" [
+          label = " db",
+          fontsize = 12,
+          image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Resource/Res_Compute/Res_48_Dark/Res_Amazon-EC2_T2-Instance_48_Dark.png",
+          imagescale = "true",
+          imagepos = "tc",
+          penwidth = "0",
+          shape = "node",
+          fixedsize = "true",
+          labelloc = "b",
+          width = 2,
+          height = 2.266,
+        ];
+        "three-tier-linux-DbStack/DbSecretIdSsmParameter" [
+          label = "\nDbSecretIdSsmParamete",
+          fontsize = 12,
+        ];
+        "three-tier-linux-DbStack/ApplicationLayerInstanceProfileRole/Policy" [
+          label = " Policy",
+          fontsize = 12,
+          image = "/usr/local/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Security-Identity-Compliance/64/Arch_AWS-Identity-and-Access-Management_64@5x.png",
+          imagescale = "true",
+          imagepos = "tc",
+          penwidth = "0",
+          shape = "node",
+          fixedsize = "true",
+          labelloc = "b",
+          width = 1.2,
+          height = 1.466,
+        ];
+      }
+    }
+  }
+  "three-tier-linux-FrontendStack/three-tier-linuxInstanceSecurityGroup" -> "three-tier-linux-FrontendStack/three-tier-linuxALBSecurityGroup" [
+    dir = "both",
+  ];
+  "three-tier-linux-FrontendStack/three-tier-linuxLoadBalancer" -> "three-tier-linux-FrontendStack/three-tier-linuxALBSecurityGroup" [
+    dir = "both",
+  ];
+  "three-tier-linux-FrontendStack/three-tier-linuxLoadBalancer" -> "three-tier-linux-FrontendStack/three-tier-linuxCertificate" [
+    dir = "both",
+  ];
+  "three-tier-linux-FrontendStack/three-tier-linuxLoadBalancer" -> "three-tier-linux-FrontendStack/three-tier-linuxTargetGroup" [
+    dir = "both",
+  ];
+  "three-tier-linux-FrontendStack/three-tier-linuxAliasRecord" -> "three-tier-linux-FrontendStack/three-tier-linuxLoadBalancer" [
+    dir = "both",
+  ];
+  "three-tier-linux-FrontendStack/InstanceAsg/InstanceProfile" -> "three-tier-linux-FrontendStack/InstanceSSM" [
+    dir = "both",
+  ];
+  "three-tier-linux-FrontendStack/InstanceAsg/LaunchConfig" -> "three-tier-linux-FrontendStack/InstanceAsg/InstanceProfile" [
+    dir = "both",
+  ];
+  "three-tier-linux-FrontendStack/InstanceAsg/LaunchConfig" -> "three-tier-linux-FrontendStack/three-tier-linuxInstanceSecurityGroup" [
+    dir = "both",
+  ];
+  "three-tier-linux-FrontendStack/InstanceAsg/ASG" -> "three-tier-linux-FrontendStack/InstanceAsg/LaunchConfig" [
+    dir = "both",
+  ];
+  "three-tier-linux-FrontendStack/InstanceAsg/ASG" -> "three-tier-linux-FrontendStack/three-tier-linuxTargetGroup" [
+    dir = "both",
+  ];
+  "three-tier-linux-DbStack/DbSecretIdSsmParameter" -> "three-tier-linux-DbStack/db" [
+    dir = "both",
+  ];
+  "three-tier-linux-DbStack/ApplicationLayerInstanceProfileRole/Policy" -> "three-tier-linux-DbStack/db" [
+    dir = "both",
+  ];
+  "three-tier-linux-DbStack/ApplicationLayerInstanceProfileRole/Policy" -> "three-tier-linux-DbStack/DbSecretIdSsmParameter" [
+    dir = "both",
+  ];
+}
