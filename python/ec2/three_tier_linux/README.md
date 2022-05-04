@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="docs/diagram.png" />
+    <img src="diagram.png" />
 </p>
 
 # Welcome to the CDK Python project three_tier_linux_stack!
