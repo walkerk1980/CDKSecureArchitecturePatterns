@@ -40,32 +40,6 @@ digraph "Diagram" {
         style = "filled,rounded",
         fillcolor = "#f3f3f3",
       ];
-      subgraph "cluster-SubGraph.three-tier-linux-NetworkStack" {
-        graph [
-          label = "three-tier-linux-NetworkStack",
-          labelloc = "b",
-          labeljust = "l",
-          margin = "10",
-          fontsize = "16",
-          penwidth = "2",
-          pencolor = "#888888",
-          style = "filled,rounded",
-          fillcolor = "#e4e4e4",
-        ];
-        "three-tier-linux-NetworkStack/three-tier-linuxVPC" [
-          label = " three-tier-linuxVPC",
-          fontsize = 12,
-          image = "/Users/kwalker/.npm/_npx/b98735c91b702b55/node_modules/cdk-dia/icons/aws/Service/Arch_Networking-Content/64/Arch_Amazon-Virtual-Private-Cloud_64@5x.png",
-          imagescale = "true",
-          imagepos = "tc",
-          penwidth = "0",
-          shape = "node",
-          fixedsize = "true",
-          labelloc = "b",
-          width = 2,
-          height = 2.266,
-        ];
-      }
       subgraph "cluster-SubGraph.three-tier-linux-FrontendStack" {
         graph [
           label = "three-tier-linux-FrontendStack",
@@ -267,16 +241,7 @@ digraph "Diagram" {
       }
     }
   }
-  "three-tier-linux-FrontendStack/three-tier-linuxInstanceSecurityGroup" -> "three-tier-linux-NetworkStack/three-tier-linuxVPC" [
-    dir = "both",
-  ];
   "three-tier-linux-FrontendStack/three-tier-linuxInstanceSecurityGroup" -> "three-tier-linux-FrontendStack/three-tier-linuxALBSecurityGroup" [
-    dir = "both",
-  ];
-  "three-tier-linux-FrontendStack/three-tier-linuxALBSecurityGroup" -> "three-tier-linux-NetworkStack/three-tier-linuxVPC" [
-    dir = "both",
-  ];
-  "three-tier-linux-FrontendStack/three-tier-linuxLoadBalancer" -> "three-tier-linux-NetworkStack/three-tier-linuxVPC" [
     dir = "both",
   ];
   "three-tier-linux-FrontendStack/three-tier-linuxLoadBalancer" -> "three-tier-linux-FrontendStack/three-tier-linuxALBSecurityGroup" [
@@ -303,16 +268,7 @@ digraph "Diagram" {
   "three-tier-linux-FrontendStack/InstanceAsg/ASG" -> "three-tier-linux-FrontendStack/InstanceAsg/LaunchConfig" [
     dir = "both",
   ];
-  "three-tier-linux-FrontendStack/InstanceAsg/ASG" -> "three-tier-linux-NetworkStack/three-tier-linuxVPC" [
-    dir = "both",
-  ];
   "three-tier-linux-FrontendStack/InstanceAsg/ASG" -> "three-tier-linux-FrontendStack/three-tier-linuxTargetGroup" [
-    dir = "both",
-  ];
-  "three-tier-linux-FrontendStack/three-tier-linuxTargetGroup" -> "three-tier-linux-NetworkStack/three-tier-linuxVPC" [
-    dir = "both",
-  ];
-  "three-tier-linux-DbStack/db" -> "three-tier-linux-NetworkStack/three-tier-linuxVPC" [
     dir = "both",
   ];
   "three-tier-linux-DbStack/db" -> "three-tier-linux-FrontendStack/three-tier-linuxInstanceSecurityGroup" [
