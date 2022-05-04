@@ -1,3 +1,5 @@
+import aws_cdk as cdk
+
 from aws_cdk import (
     aws_iam as iam,
     aws_rds as rds,
@@ -6,14 +8,14 @@ from aws_cdk import (
     aws_autoscaling as autoscaling,
     aws_kms as kms,
     aws_ssm as ssm,
-    core
 )
+from constructs import Construct
 
 import common.functions
 
-class DbStack(core.Stack):
+class DbStack(cdk.Stack):
 
-    def __init__(self, scope: core.Construct, id: str, props, constants, **kwargs) -> None:
+    def __init__(self, scope: Construct, id: str, props, constants, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
         # Unpack constants
@@ -57,11 +59,11 @@ class DbStack(core.Stack):
             hosted_rotation = sm.HostedRotation.maria_db_single_user(vpc=VPC)
 
         # Default to snapshot option on db deletion
-        database_removal_policy = core.RemovalPolicy.SNAPSHOT
+        database_removal_policy = cdk.RemovalPolicy.SNAPSHOT
         if self.DATABASE_REMOVAL_POLICY == 'retain':
-            database_removal_policy = core.RemovalPolicy.RETAIN
+            database_removal_policy = cdk.RemovalPolicy.RETAIN
         elif self.DATABASE_REMOVAL_POLICY == 'destroy':
-            database_removal_policy = core.RemovalPolicy.DESTROY
+            database_removal_policy = cdk.RemovalPolicy.DESTROY
 
         # Choose between service CMK and Customer Managed CMK
         if self.DATABASE_ENCRYPTION_KEY == 'RDS_SERVICE_KEY':

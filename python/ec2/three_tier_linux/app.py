@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-from aws_cdk import (
-    core
-)
+import aws_cdk as cdk
 
 from three_tier_linux.frontend_stack import FrontendStack
 from three_tier_linux.network_stack import NetworkStack
@@ -48,14 +46,14 @@ constants.update({'BASE_AMI_NAME': BASE_AMI_NAME})
 
 props = {'namespace': 'NetworkStack'}
 
-app = core.App()
+app = cdk.App()
 
 network_stack = NetworkStack(
     app,
     '{}-NetworkStack'.format(APP_NAME),
     props,
     constants,
-    env=core.Environment(
+    env=cdk.Environment(
         account=DEPLOYMENT_ACCOUNT,
         region=DEPLOYMENT_REGION
     )
@@ -66,7 +64,7 @@ frontend_stack = FrontendStack(
     '{}-FrontendStack'.format(APP_NAME),
     network_stack.output_props,
     constants,
-    env=core.Environment(
+    env=cdk.Environment(
         account=DEPLOYMENT_ACCOUNT,
         region=DEPLOYMENT_REGION
     )
@@ -79,7 +77,7 @@ db_stack = DbStack(
     '{}-DbStack'.format(APP_NAME),
     frontend_stack.output_props,
     constants,
-    env=core.Environment(
+    env=cdk.Environment(
         account=DEPLOYMENT_ACCOUNT,
         region=DEPLOYMENT_REGION
     )

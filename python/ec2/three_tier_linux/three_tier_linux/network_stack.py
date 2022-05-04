@@ -1,3 +1,5 @@
+import aws_cdk as cdk
+
 from aws_cdk import (
     aws_ec2 as ec2,
     aws_iam as iam,
@@ -5,14 +7,14 @@ from aws_cdk import (
     aws_certificatemanager as acm,
     aws_route53 as r53,
     aws_route53_targets as r53_targets,
-    core
 )
+from constructs import Construct
 
 import common.functions
 
-class NetworkStack(core.Stack):
+class NetworkStack(cdk.Stack):
 
-    def __init__(self, scope: core.Construct, construct_id: str, props, constants: dict, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, props, constants: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Unpack constants
@@ -23,7 +25,7 @@ class NetworkStack(core.Stack):
             vpc = ec2.Vpc(self, '{0}VPC'.format(self.APP_NAME),
                 subnet_configuration=[
                     ec2.SubnetConfiguration(name='public',subnet_type=ec2.SubnetType.PUBLIC),
-                    ec2.SubnetConfiguration(name='private',subnet_type=ec2.SubnetType.PRIVATE),
+                    ec2.SubnetConfiguration(name='private',subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT),
                 ]
             )
         else:
@@ -35,7 +37,7 @@ class NetworkStack(core.Stack):
 
         # This will export the VPC's ID in CloudFormation under the key
         # 'vpcid'
-        core.CfnOutput(self, 'vpcid', value=vpc.vpc_id)
+        cdk.CfnOutput(self, 'vpcid', value=vpc.vpc_id)
 
         # Prepares output attributes to be passed into other stacks
         # In this case, it is our VPC and subnets.

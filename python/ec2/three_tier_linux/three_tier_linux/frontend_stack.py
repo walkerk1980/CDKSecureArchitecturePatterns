@@ -1,6 +1,7 @@
 import os.path
 
 from aws_cdk.aws_s3_assets import Asset
+import aws_cdk as cdk
 
 from aws_cdk import (
     aws_ec2 as ec2,
@@ -12,14 +13,14 @@ from aws_cdk import (
     aws_route53_targets as r53_targets,
     aws_autoscaling as autoscaling,
     aws_kms as kms,
-    core
 )
+from constructs import Construct
 
 import common.functions
 
-class FrontendStack(core.Stack):
+class FrontendStack(cdk.Stack):
 
-    def __init__(self, scope: core.Construct, construct_id: str, props, constants: dict, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, props, constants: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Unpack constants
@@ -40,7 +41,7 @@ class FrontendStack(core.Stack):
 
         # AMI
         windows = ec2.MachineImage.latest_windows(
-            version=ec2.WindowsVersion.WINDOWS_SERVER_2019_ENGLISH_CORE_BASE
+            version=ec2.WindowsVersion.WINDOWS_SERVER_2022_ENGLISH_CORE_BASE
         )
 
         # Custom Image
@@ -60,7 +61,7 @@ class FrontendStack(core.Stack):
         # Instance Role and SSM Managed Policy
         role = iam.Role(self, 'InstanceSSM', assumed_by=iam.ServicePrincipal('ec2.amazonaws.com'))
 
-        role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSSMManagedInstanceCore'))
+        role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSSMManagedInstancecdk'))
         role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonSSMDirectoryServiceAccess'))
         role.add_managed_policy(
             iam.ManagedPolicy.from_managed_policy_name(self, id='LogsPolicy',
@@ -77,12 +78,20 @@ class FrontendStack(core.Stack):
             allow_all_outbound=True
         )
 
+        # Hosted Zone Lookup
+        hosted_zone = r53.HostedZone.from_lookup(
+            self, 'AppHostedZone',
+            domain_name=self.HOSTED_ZONE_DOMAIN
+        )
+
         # ACM Certificate for application frontend
         acm_cert = acm.Certificate(
             self, '{}Certificate'.format(self.APP_NAME),
             domain_name=self.APP_DOMAIN,
             subject_alternative_names=['www.{}'.format(self.APP_DOMAIN)],
-            validation_method=acm.ValidationMethod.DNS
+            validation=acm.CertificateValidation.from_dns(
+                hosted_zone=hosted_zone
+            )
         )
 
         #Security Group for ALB
@@ -106,14 +115,16 @@ class FrontendStack(core.Stack):
             port=80
         )
 
-        http_listener.add_redirect_response(
+        http_listener.add_action(
             'RedirectHttpToHttps',
-            status_code='HTTP_301',
-            #host='#{host}',
-            #path='/#{path}',
-            #query='#{query}',
-            port='443',
-            protocol='HTTPS'
+            action=elbv2.ListenerAction.redirect(
+                #host='#{host}',
+                #path='/#{path}',
+                #query='#{query}',
+                port='443',
+                protocol='HTTPS'
+            ),
+            conditions=[]
         )
 
         # Allow traffic from ALB SG to Instance SG
@@ -124,11 +135,6 @@ class FrontendStack(core.Stack):
         )
 
         # DNS record for ALB
-        hosted_zone = r53.HostedZone.from_lookup(
-            self, 'AppHostedZone',
-            domain_name=self.HOSTED_ZONE_DOMAIN
-        )
-
         # Create an Alias record of www to point at ALB
         alb_target = r53_targets.LoadBalancerTarget(alb)
         alb_record_target = r53.RecordTarget(
@@ -148,15 +154,15 @@ class FrontendStack(core.Stack):
             vpc=vpc,
             instance_type=ec2.InstanceType('t3.micro'),
             role=role,
-            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT),
             security_group=instance_sg,
             machine_image=base_ami,
-            health_check=autoscaling.HealthCheck.elb(grace=core.Duration.seconds(120)),
+            health_check=autoscaling.HealthCheck.elb(grace=cdk.Duration.seconds(120)),
             min_capacity=2,
             max_capacity=7,
-            max_instance_lifetime=core.Duration.days(7)
+            max_instance_lifetime=cdk.Duration.days(7)
         )
-        core.Tags.of(instance_asg).add('Patch Group', 'Immutable')
+        cdk.Tags.of(instance_asg).add('Patch Group', 'Immutable')
 
         # Health check for Target Group
         instance_tg_health_check = elbv2.HealthCheck(
@@ -165,8 +171,8 @@ class FrontendStack(core.Stack):
             port='traffic-port',
             healthy_threshold_count=2,
             unhealthy_threshold_count=3,
-            timeout=core.Duration.seconds(5),
-            interval=core.Duration.seconds(30),
+            timeout=cdk.Duration.seconds(5),
+            interval=cdk.Duration.seconds(30),
             healthy_http_codes='200',
         )
 
